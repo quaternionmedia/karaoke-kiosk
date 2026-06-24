@@ -1,0 +1,14 @@
+[project]
+name = "karaoke-kiosk"
+version = "0.1.0"
+description = "Karaoke Kiosk manager"
+readme = "README.md"
+requires-python = ">=3.10"
+dependencies = ["fastapi>=0.138.0", "sqlmodel>=0.0.38"]
+
+[dependency-groups]
+dev = [
+    "black>=26.5.1",
+    "ruff>=0.15.19",
+    "uvicorn>=0.49.0",
+]
