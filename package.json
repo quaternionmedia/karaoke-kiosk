@@ -1,0 +1,20 @@
+{
+  "name": "karaoke-kiosk",
+  "version": "1.0.0",
+  "description": "Rock Star Video — karaoke kiosk SPA (Mithril + Vite + TypeScript)",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "dev": "vite",
+    "build": "tsc && vite build",
+    "preview": "vite preview"
+  },
+  "dependencies": {
+    "mithril": "^2.3.8"
+  },
+  "devDependencies": {
+    "@types/mithril": "^2.2.8",
+    "typescript": "^6.0.3",
+    "vite": "^8.0.16"
+  }
+}
