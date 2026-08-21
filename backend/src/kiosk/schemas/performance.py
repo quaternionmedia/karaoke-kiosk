@@ -25,6 +25,7 @@ class PerformanceRead(BaseModel):
     performer_id: int
     song_id: int
     status: PerformanceStatus
+    queue_position: int | None
     started_at: datetime | None
     finished_at: datetime | None
     recording: RecordingRead | None = None

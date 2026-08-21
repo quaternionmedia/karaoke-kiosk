@@ -11,8 +11,6 @@ class VenueCreate(BaseModel):
     name: str
     location: str | None = None
     welcome_message: str | None = None
-    email_subject_template: str | None = None
-    email_body_template: str | None = None
     splash_delay_ms: int = 3500
     countdown_from: int = 3
     thank_you_duration_ms: int = 5000
@@ -25,8 +23,6 @@ class VenueUpdate(BaseModel):
     name: str | None = None
     location: str | None = None
     welcome_message: str | None = None
-    email_subject_template: str | None = None
-    email_body_template: str | None = None
     splash_delay_ms: int | None = None
     countdown_from: int | None = None
     thank_you_duration_ms: int | None = None
@@ -40,8 +36,6 @@ class VenueRead(BaseModel):
     name: str
     location: str | None
     welcome_message: str | None
-    email_subject_template: str | None
-    email_body_template: str | None
     splash_delay_ms: int
     countdown_from: int
     thank_you_duration_ms: int

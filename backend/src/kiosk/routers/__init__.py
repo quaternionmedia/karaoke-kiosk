@@ -5,11 +5,14 @@ from __future__ import annotations
 from fastapi import APIRouter
 
 from kiosk.routers import (
+    email_templates,
     events,
     performances,
     performers,
+    queue,
     recording,
     session,
+    settings,
     songs,
     venues,
 )
@@ -28,5 +31,8 @@ api_router.include_router(venues.admin_router)
 api_router.include_router(events.admin_router)
 api_router.include_router(performers.admin_router)
 api_router.include_router(performances.admin_router)
+api_router.include_router(queue.admin_router)
+api_router.include_router(email_templates.admin_router)
+api_router.include_router(settings.admin_router)
 
 __all__ = ["api_router"]

@@ -32,6 +32,7 @@ class Performance(TimestampMixin, table=True):
     song_id: int = Field(foreign_key="song.id", index=True)
 
     status: PerformanceStatus = Field(default=PerformanceStatus.PLAYING, index=True)
+    queue_position: int | None = Field(default=None, index=True)  # null once playing
     started_at: datetime | None = None
     finished_at: datetime | None = None
 

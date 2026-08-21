@@ -15,9 +15,10 @@ dependencies = [
 dev = [
     "black>=26.5.1",
     "ruff>=0.15.19",
-    "uvicorn>=0.49.0",
+    "uvicorn[standard]>=0.49.0",
     "pytest>=8",
     "httpx>=0.27",
+    "websockets>=14.0",
 ]
 
 [build-system]

@@ -25,7 +25,7 @@ export interface ApiClient {
 
 // ── Shared fetch helper ─────────────────────────────────────────────
 
-async function fetchJson<T>(path: string, init?: RequestInit): Promise<T> {
+export async function fetchJson<T>(path: string, init?: RequestInit): Promise<T> {
   const res = await fetch(apiUrl(path), {
     headers: { "Content-Type": "application/json", ...(init?.headers ?? {}) },
     ...init,
@@ -110,3 +110,5 @@ console.info(
   `[api] mode=${ENV.demoMode ? "demo" : "live"}` +
     (ENV.demoMode ? "" : ` base=${ENV.apiBaseUrl || "(same-origin)"}`),
 );
+
+export { apiUrl } from "../env";

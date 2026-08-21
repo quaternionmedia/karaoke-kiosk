@@ -13,6 +13,7 @@ PERFORMANCE_STARTED = "performance.started"
 PERFORMANCE_FINISHED = "performance.finished"
 RECORDING_READY = "recording.ready"
 EMAIL_SEND = "email.send"
+QUEUE_CHANGED = "queue.changed"
 
 
 @dataclass(frozen=True)
@@ -45,3 +46,8 @@ class EmailSend:
     subject: str
     body: str
     performance_id: int | None = None
+
+
+@dataclass(frozen=True)
+class QueueChanged:
+    event_id: int | None = None  # which event's queue changed, or None for all

@@ -4,6 +4,7 @@ Anything that needs the full schema (``create_all``, Alembic autogenerate)
 should ``import kiosk.models`` to guarantee all tables are registered.
 """
 
+from kiosk.models.email_template import EmailTemplate
 from kiosk.models.event import Event
 from kiosk.models.performance import Performance
 from kiosk.models.performer import Performer
@@ -12,6 +13,7 @@ from kiosk.models.song import Song, SongTagLink, Tag
 from kiosk.models.venue import Venue
 
 __all__ = [
+    "EmailTemplate",
     "Event",
     "Performance",
     "Performer",

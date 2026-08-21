@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+import asyncio
 from contextlib import asynccontextmanager
 
 from fastapi import FastAPI
@@ -10,6 +11,7 @@ from fastapi.middleware.cors import CORSMiddleware
 from kiosk.config import get_settings
 from kiosk.events.bus import EventBus
 from kiosk.events.handlers import register_default_handlers
+from kiosk.events.handlers.ws import get_broadcaster
 from kiosk.routers import api_router
 
 
@@ -21,6 +23,12 @@ def create_app() -> FastAPI:
         bus = EventBus()
         register_default_handlers(bus, settings)
         app.state.bus = bus
+        
+        # Capture the running event loop for the WebSocket broadcaster
+        broadcaster = get_broadcaster()
+        broadcaster.set_loop(asyncio.get_running_loop())
+        app.state.broadcaster = broadcaster
+        
         yield
 
     app = FastAPI(title="Karaoke Kiosk API", version="0.1.0", lifespan=lifespan)

@@ -45,6 +45,44 @@ def list_performances(
     return list(session.exec(stmt).all())
 
 
+def _begin(
+    session: Session,
+    bus: EventBus,
+    performance: Performance,
+    venue_id: int | None = None,
+) -> Performance:
+    """Transition a performance to PLAYING and emit ``performance.started``.
+
+    Persists the performance, creates a pending Recording, and fires the
+    PERFORMANCE_STARTED event. Used by both start_performance and queue.start_next.
+    """
+    performance.status = PerformanceStatus.PLAYING
+    performance.started_at = utcnow()
+    performance.queue_position = None  # no longer queued
+    session.add(performance)
+    session.commit()
+    session.refresh(performance)
+
+    recording = Recording(
+        performance_id=performance.id, status=RecordingStatus.PENDING
+    )
+    session.add(recording)
+    session.commit()
+
+    bus.emit(
+        signals.PERFORMANCE_STARTED,
+        signals.PerformanceStarted(
+            performance_id=performance.id,
+            session_token=performance.session_token,
+            song_id=performance.song_id,
+            performer_id=performance.performer_id,
+            venue_id=venue_id,
+            event_id=performance.event_id,
+        ),
+    )
+    return performance
+
+
 def start_performance(
     session: Session,
     bus: EventBus,
@@ -76,31 +114,8 @@ def start_performance(
         song_id=song_id,
         performer_id=performer.id,
         event_id=event_id,
-        status=PerformanceStatus.PLAYING,
-        started_at=utcnow(),
     )
-    session.add(performance)
-    session.commit()
-    session.refresh(performance)
-
-    recording = Recording(
-        performance_id=performance.id, status=RecordingStatus.PENDING
-    )
-    session.add(recording)
-    session.commit()
-
-    bus.emit(
-        signals.PERFORMANCE_STARTED,
-        signals.PerformanceStarted(
-            performance_id=performance.id,
-            session_token=performance.session_token,
-            song_id=song_id,
-            performer_id=performer.id,
-            venue_id=venue_id,
-            event_id=event_id,
-        ),
-    )
-    return performance
+    return _begin(session, bus, performance, venue_id=venue_id)
 
 
 def stop_performance(
@@ -183,9 +198,10 @@ def _build_share_email(
     recording: Recording,
     email: str,
 ) -> signals.EmailSend:
-    """Render the recording-share email from the venue's templates."""
+    """Render the recording-share email from the venue's email_template."""
     from kiosk.models.song import Song
     from kiosk.models.venue import Venue
+    from kiosk.services import email_templates as et_service
 
     song = session.get(Song, performance.song_id)
     venue: Venue | None = None
@@ -195,25 +211,27 @@ def _build_share_email(
             venue = session.get(Venue, event.venue_id)
 
     venue_name = venue.name if venue else "Karaoke Kiosk"
-    subject_tpl = (
-        venue.email_subject_template
-        if venue and venue.email_subject_template
-        else "Your performance at {venue}!"
-    )
-    body_tpl = (
-        venue.email_body_template
-        if venue and venue.email_body_template
-        else "Hi {name}, here is your recording of {song}: {recording_url}"
-    )
+    
+    # Look up the template or use defaults
+    subject_tpl = et_service.DEFAULT_SHARE_SUBJECT
+    body_tpl = et_service.DEFAULT_SHARE_BODY
+    if venue:
+        template = et_service.get_template_by_slug(session, venue.id, "recording_share")
+        if template:
+            subject_tpl = template.subject
+            body_tpl = template.body
+    
     ctx = {
         "name": performance.performer.name if performance.performer else "",
         "song": song.name if song else "",
         "recording_url": recording.url or "",
         "venue": venue_name,
     }
+    
+    subject, body = et_service.render(subject_tpl, body_tpl, **ctx)
     return signals.EmailSend(
         to=email,
-        subject=subject_tpl.format(**ctx),
-        body=body_tpl.format(**ctx),
+        subject=subject,
+        body=body,
         performance_id=performance.id,
     )

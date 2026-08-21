@@ -7,6 +7,7 @@ from sqlmodel import Field, Relationship
 from kiosk.models.base import TimestampMixin
 
 if TYPE_CHECKING:
+    from kiosk.models.email_template import EmailTemplate
     from kiosk.models.event import Event
 
 
@@ -16,10 +17,6 @@ class Venue(TimestampMixin, table=True):
     name: str
     location: str | None = None
     welcome_message: str | None = None
-
-    # Email templates support {name}, {song}, {recording_url}, {venue} placeholders.
-    email_subject_template: str | None = None
-    email_body_template: str | None = None
 
     # Kiosk UI timings (mirror frontend/src/config.ts).
     splash_delay_ms: int = 3500
@@ -33,3 +30,4 @@ class Venue(TimestampMixin, table=True):
     is_active: bool = True
 
     events: list["Event"] = Relationship(back_populates="venue")
+    email_templates: list["EmailTemplate"] = Relationship(back_populates="venue")

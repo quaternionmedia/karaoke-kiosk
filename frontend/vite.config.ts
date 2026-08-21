@@ -1,4 +1,13 @@
 import { defineConfig } from "vite";
 
-// Minimal config — Mithril needs no special plugins.
-export default defineConfig({});
+// Two entries: the kiosk and the admin dashboard.
+export default defineConfig({
+  build: {
+    rollupOptions: {
+      input: {
+        main: new URL("./index.html", import.meta.url).pathname,
+        admin: new URL("./admin.html", import.meta.url).pathname,
+      },
+    },
+  },
+});
