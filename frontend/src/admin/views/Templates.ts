@@ -17,29 +17,37 @@ interface TemplatesViewState {
 const ALLOWED_PLACEHOLDERS = ["name", "song", "recording_url", "venue"];
 
 export const TemplatesView = {
-  state: {
-    venues: [],
-    templates: [],
-    selectedVenueId: null,
-    editingTemplate: null,
-    preview: null,
-    isLoading: false,
-  } as TemplatesViewState,
-
   oninit: async (vnode: any) => {
+    // Initialize vnode.state properly
+    if (!vnode.state.venues) {
+      Object.assign(vnode.state, {
+        venues: [],
+        templates: [],
+        selectedVenueId: null,
+        editingTemplate: null,
+        preview: null,
+        isLoading: false,
+      });
+    }
     const state = vnode.state as TemplatesViewState;
 
     state.isLoading = true;
     try {
+      console.log("[Templates] Loading venues...");
       state.venues = await api.listVenues();
+      console.log("[Templates] Loaded venues:", state.venues);
       if (state.venues.length > 0) {
         state.selectedVenueId = state.venues[0].id;
+        console.log("[Templates] Loading templates for venue", state.selectedVenueId);
         state.templates = await api.listEmailTemplates(state.selectedVenueId);
+        console.log("[Templates] Loaded templates:", state.templates);
       }
-    } catch (e) {
-      console.error("Failed to load templates:", e);
+    } catch (e: any) {
+      console.error("[Templates] Failed to load:", e);
+      alert(`Failed to load templates: ${e.message || e}`);
     } finally {
       state.isLoading = false;
+      m.redraw();
     }
   },
 

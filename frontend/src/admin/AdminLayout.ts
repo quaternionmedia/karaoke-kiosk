@@ -10,9 +10,9 @@ export const AdminLayout = {
       m("nav.admin-nav", [
         m("h1", "🎤 Karaoke Admin"),
         m("ul", [
-          m("li", m(m.route.Link, { href: "#!/queue" }, "Queue")),
-          m("li", m(m.route.Link, { href: "#!/config" }, "Config")),
-          m("li", m(m.route.Link, { href: "#!/templates" }, "Templates")),
+          m("li", m(m.route.Link, { href: "/queue" }, "Queue")),
+          m("li", m(m.route.Link, { href: "/config" }, "Config")),
+          m("li", m(m.route.Link, { href: "/templates" }, "Templates")),
         ]),
       ]),
       m(".admin-main", vnode.children),

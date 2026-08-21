@@ -14,31 +14,38 @@ interface ConfigViewState {
 }
 
 export const ConfigView = {
-  state: {
-    venues: [],
-    settings: null,
-    selectedVenueId: null,
-    editingVenue: null,
-    isLoading: false,
-  } as ConfigViewState,
-
   oninit: async (vnode: any) => {
+    // Initialize vnode.state properly
+    if (!vnode.state.venues) {
+      Object.assign(vnode.state, {
+        venues: [],
+        settings: null,
+        selectedVenueId: null,
+        editingVenue: null,
+        isLoading: false,
+      });
+    }
     const state = vnode.state as ConfigViewState;
 
     state.isLoading = true;
     try {
+      console.log("[Config] Loading venues and settings...");
       [state.venues, state.settings] = await Promise.all([
         api.listVenues(),
         api.getSettings(),
       ]);
+      console.log("[Config] Loaded venues:", state.venues);
+      console.log("[Config] Loaded settings:", state.settings);
       if (state.venues.length > 0) {
         state.selectedVenueId = state.venues[0].id;
         state.editingVenue = { ...state.venues[0] };
       }
-    } catch (e) {
-      console.error("Failed to load config:", e);
+    } catch (e: any) {
+      console.error("[Config] Failed to load config:", e);
+      alert(`Failed to load config: ${e.message || e}`);
     } finally {
       state.isLoading = false;
+      m.redraw();
     }
   },
 

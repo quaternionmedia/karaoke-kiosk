@@ -21,55 +21,67 @@ interface QueueViewState {
 }
 
 export const QueueView = {
-  state: {
-    queue: [],
-    songs: [],
-    venues: [],
-    selectedVenueId: null,
-    enqueueFormState: { songId: null, name: "", email: "" },
-    isLoading: false,
-    wsConnected: false,
-  } as QueueViewState,
-
   oninit: async (vnode: any) => {
+    // Initialize vnode.state properly
+    if (!vnode.state.queue) {
+      Object.assign(vnode.state, {
+        queue: [],
+        songs: [],
+        venues: [],
+        selectedVenueId: null,
+        enqueueFormState: { songId: null, name: "", email: "" },
+        isLoading: false,
+        wsConnected: false,
+      });
+    }
     const state = vnode.state as QueueViewState;
 
     // Load initial data
     state.isLoading = true;
     try {
+      console.log("[Queue] Loading venues, songs, and queue...");
       [state.venues, state.songs, state.queue] = await Promise.all([
         api.listVenues(),
         api.listSongs(),
         api.listQueue(),
       ]);
+      console.log("[Queue] Loaded venues:", state.venues);
+      console.log("[Queue] Loaded songs:", state.songs);
+      console.log("[Queue] Loaded queue:", state.queue);
       if (state.venues.length > 0) {
         state.selectedVenueId = state.venues[0].id;
       }
-    } catch (e) {
-      console.error("Failed to load queue data:", e);
+    } catch (e: any) {
+      console.error("[Queue] Failed to load data:", e);
+      alert(`Failed to load queue data: ${e.message || e}`);
     } finally {
       state.isLoading = false;
     }
 
-    // Connect to WebSocket
+    // Connect to WebSocket (optional; if it fails, the rest still works)
     try {
+      console.log("[Queue] Connecting to WebSocket...");
       await queueWs.connect();
       state.wsConnected = true;
+      console.log("[Queue] WebSocket connected");
 
       queueWs.onUpdate(async (msg) => {
         if (msg.type === "queue.changed") {
           // Refetch queue
           try {
+            console.log("[Queue] Queue changed, refetching...");
             state.queue = await api.listQueue(state.selectedVenueId || undefined);
             m.redraw();
           } catch (e) {
-            console.error("Failed to refetch queue:", e);
+            console.error("[Queue] Failed to refetch queue:", e);
           }
         }
       });
-    } catch (e) {
-      console.error("Failed to connect to WebSocket:", e);
+    } catch (e: any) {
+      console.warn("[Queue] WebSocket connection failed (optional):", e);
+      state.wsConnected = false;
     }
+    m.redraw();
   },
 
   oncreate: (vnode: any) => {
